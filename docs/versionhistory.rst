@@ -29,6 +29,10 @@ This library adheres to `Semantic Versioning 2.0 <http://semver.org/>`_.
   from within ``from_thread.run_sync()``), where ``asyncio.current_task()`` is
   legitimately ``None``
   (`#773 <https://github.com/agronholm/anyio/issues/773>`_; PR by @AmirF194)
+- Fixed ``Lock.locked()`` (and ``Condition.locked()``) raising ``NoEventLoopError``
+  when the lock had been created outside a running event loop and had not been acquired
+  yet, even though the same state query (``Lock.statistics().locked``) worked there
+  (PR by @feiiiiii5)
 
 **4.15.1**
 

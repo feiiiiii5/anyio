@@ -243,6 +243,22 @@ class TestLock:
 
         run(use_lock, backend=anyio_backend_name, backend_options=anyio_backend_options)
 
+    def test_locked_outside_event_loop(
+        self, anyio_backend_name: str, anyio_backend_options: dict[str, Any]
+    ) -> None:
+        async def use_lock() -> None:
+            async with lock:
+                assert lock.locked()
+
+        lock = Lock()
+        # Nothing has been acquired yet, so the lock cannot be held; this query
+        # must work outside an event loop, just like statistics().locked does
+        assert not lock.locked()
+
+        run(use_lock, backend=anyio_backend_name, backend_options=anyio_backend_options)
+
+        assert not lock.locked()
+
     async def test_owner_after_release(self) -> None:
         async def taskfunc1() -> None:
             await lock.acquire()
@@ -510,6 +526,12 @@ class TestCondition:
             backend=anyio_backend_name,
             backend_options=anyio_backend_options,
         )
+
+    def test_locked_outside_event_loop(self) -> None:
+        condition = Condition()
+        # The underlying lock has not been created yet, so it cannot be held
+        assert not condition.locked()
+        assert not condition.statistics().lock_statistics.locked
 
     async def test_wait_for(self) -> None:
         result = None
