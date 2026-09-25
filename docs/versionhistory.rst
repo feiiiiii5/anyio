@@ -30,7 +30,8 @@ This library adheres to `Semantic Versioning 2.0 <http://semver.org/>`_.
   legitimately ``None``
   (`#773 <https://github.com/agronholm/anyio/issues/773>`_; PR by @AmirF194)
 - Fixed ``Semaphore(fast_acquire=True)`` losing its fast-acquire behavior when
-  instantiated outside a running event loop (PR by @feiiiiii5)
+  instantiated outside a running event loop
+  (`#1348 <https://github.com/agronholm/anyio/pull/1348>`_; PR by @feiiiiii5)
 
 **4.15.1**
 
