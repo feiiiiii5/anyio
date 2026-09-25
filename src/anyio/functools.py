@@ -35,6 +35,7 @@ from typing import (
 from weakref import WeakKeyDictionary
 
 from ._core._eventloop import current_time
+from ._core._exceptions import NoEventLoopError
 from ._core._synchronization import Lock
 from .lowlevel import RunVar, checkpoint
 
@@ -130,9 +131,15 @@ class AsyncLRUCacheWrapper(Generic[P, T]):
         }
 
     def cache_clear(self) -> None:
-        if cache := lru_cache_items.get(None):
+        try:
+            cache = lru_cache_items.get(None)
+        except NoEventLoopError:
+            cache = None
+
+        if cache:
             cache.pop(self, None)
-            self._hits = self._misses = self._currsize = 0
+
+        self._hits = self._misses = self._currsize = 0
 
     async def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T:
         # Easy case first: if maxsize == 0, no caching is done

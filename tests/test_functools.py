@@ -14,6 +14,7 @@ from anyio import (
     fail_after,
     get_cancelled_exc_class,
     move_on_after,
+    run,
     sleep,
     wait_all_tasks_blocked,
 )
@@ -128,6 +129,23 @@ class TestAsyncLRUCache:
 
         func.cache_clear()
         assert func.cache_info() == (0, 0, 128, 0, None)
+
+    def test_cache_clear_outside_event_loop(
+        self, anyio_backend_name: str, anyio_backend_options: dict[str, Any]
+    ) -> None:
+        @lru_cache
+        async def func() -> int:
+            return 1
+
+        run(
+            func,
+            backend=anyio_backend_name,
+            backend_options=anyio_backend_options,
+        )
+        assert func.cache_info() == AsyncCacheInfo(0, 1, 128, 1, None)
+
+        func.cache_clear()
+        assert func.cache_info() == AsyncCacheInfo(0, 0, 128, 0, None)
 
     async def test_untyped_caching(self) -> None:
         @lru_cache
